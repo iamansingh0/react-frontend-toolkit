@@ -28,7 +28,12 @@ const RegisterForm = ({ onSuccess }: { onSuccess: () => void }) => {
       
       try {
         await dispatch(register({ name, email, password })).unwrap();
-        toast.success('Registration successful! Please log in.');
+        toast.success('Registration successful! Please log in.', {
+          style: {
+              fontFamily: 'sans-serif',
+              fontSize: '1rem'
+          }
+      });
         onSuccess();
       } catch (err) {
         // Error is handled in the reducer and displayed below

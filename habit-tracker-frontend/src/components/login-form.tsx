@@ -23,7 +23,12 @@ const LoginForm: React.FC = () => {
 
         try {
             await dispatch(login({ email, password })).unwrap();
-            toast.success('Login successful!');
+            toast.success('Login successful!', {
+                style: {
+                    fontFamily: 'sans-serif',
+                    fontSize: '1rem'
+                }
+            });
         } catch (err) {
             // Error is handled in the reducer and displayed below
             console.log(err);
