@@ -1,23 +1,26 @@
 import express from "express";
-import { Habit } from "../models/Habit.js";
+import Habit from "../models/Habit.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// get all habits
-router.get("/", async (req, res) => {
+// Get all habits for the logged-in user
+router.get("/", auth, async (req, res) => {
   try {
-    const habits = await Habit.find();
+    const habits = await Habit.find({ userId: req.userId });
     res.json(habits);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Add a new habit
-router.post("/", async (req, res) => {
+// Add a new habit for the logged-in user
+router.post("/", auth, async (req, res) => {
   const habit = new Habit({
     name: req.body.name,
     frequency: req.body.frequency,
+    completedDates: [],
+    userId: req.userId,
   });
 
   try {
@@ -28,10 +31,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Toggle habit completion for a date
-router.patch("/:id/toggle", async (req, res) => {
+// Toggle habit completion for a date (for the logged-in user)
+router.patch("/:id/toggle", auth, async (req, res) => {
   try {
-    const habit = await Habit.findById(req.params.id);
+    const habit = await Habit.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
 
     if (!habit) {
       return res.status(404).json({ message: "Habit not found" });
@@ -52,10 +58,13 @@ router.patch("/:id/toggle", async (req, res) => {
   }
 });
 
-// Delete a habit
-router.delete("/:id", async (req, res) => {
+// Delete a habit (only if it belongs to the logged-in user)
+router.delete("/:id", auth, async (req, res) => {
   try {
-    const habit = await Habit.findById(req.params.id);
+    const habit = await Habit.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
 
     if (!habit) {
       return res.status(404).json({ message: "Habit not found" });
@@ -68,4 +77,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-export default router
+export default router;
