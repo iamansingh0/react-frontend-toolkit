@@ -1,13 +1,12 @@
+import { createTheme, ThemeProvider } from '@mui/material';
 import './App.css'
-import { Provider } from 'react-redux'
-import store from './store/store'
-import { Container, Typography } from '@mui/material'
-import AddHabitForm from './components/add-habit-form'
-import HabitList from './components/habit-list'
-import HabitStats from './components/habit-stats'
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Toaster } from 'react-hot-toast'
-
+import { Provider, useSelector } from 'react-redux';
+import store, { RootState } from './store/store';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import ProtectedRoute from './components/protected-route';
+import HomePage from './pages/home-page';
+import AuthPage from './pages/auth-page';
+import { Toaster } from 'react-hot-toast';
 
 const theme = createTheme({
   palette: {
@@ -33,20 +32,40 @@ const theme = createTheme({
   },
 });
 
+// Root component to use Redux hooks
+const AppRoutes = () => {
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  
+  return (
+    <Routes>
+      <Route 
+        path="/login" 
+        element={isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />} 
+      />
+      <Route 
+        path="/" 
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <Provider store={store}>
-        <Toaster position='top-right' />
-        <Container maxWidth="md">
-          <Typography component='h1' variant='h2' align='center'>Habit Tracker</Typography>
-          <AddHabitForm />
-          <HabitList />
-          <HabitStats />
-        </Container>
+        <BrowserRouter>
+          <Toaster position='top-right' />
+          <AppRoutes />
+        </BrowserRouter>
       </Provider>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

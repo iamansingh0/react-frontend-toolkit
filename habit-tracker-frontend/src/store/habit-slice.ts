@@ -1,8 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-// import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
-
-const API_URL = "https://habit-tracker-api-fpas.onrender.com/api";
+import api from "../api/api";
 
 export interface Habit {
     id: string;
@@ -44,20 +41,28 @@ const transformHabit = (habitDoc: HabitResponse): Habit => ({
 // Fetch habits from API
 export const fetchHabits = createAsyncThunk<Habit[]>(
     "habits/fetchHabits",
-    async () => {
-        const response = await axios.get<HabitResponse[]>(`${API_URL}/habits`);
-        return response.data.map(transformHabit);
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get<HabitResponse[]>("/habits");
+            return response.data.map(transformHabit);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Failed to fetch habits");
+        }
     }
 );
 
 // Add a new habit
 export const addHabit = createAsyncThunk<Habit, { name: string, frequency: "daily" | "weekly" }>(
     "habits/addHabit",
-    async (habitData) => {
-        const res = await axios.post<HabitResponse>(`${API_URL}/habits`, habitData);
-        return transformHabit(res.data)
+    async (habitData, { rejectWithValue }) => {
+        try {
+            const res = await api.post<HabitResponse>("/habits", habitData);
+            return transformHabit(res.data);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Failed to add habit");
+        }
     }
-)
+);
 
 // toggle habit completion
 export const toggleHabit = createAsyncThunk<
@@ -65,15 +70,19 @@ export const toggleHabit = createAsyncThunk<
     { id: string; date: string }
 >(
     "habits/toggleHabit",
-    async (data) => {
-        const response = await axios.patch<HabitResponse>(
-            `${API_URL}/habits/${data.id}/toggle`,
-            { date: data.date }
-        );
-        return {
-            id: response.data._id,
-            completedDates: response.data.completedDates
-        };
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await api.patch<HabitResponse>(
+                `/habits/${data.id}/toggle`,
+                { date: data.date }
+            );
+            return {
+                id: response.data._id,
+                completedDates: response.data.completedDates
+            };
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Failed to toggle habit");
+        }
     }
 );
 
@@ -83,9 +92,13 @@ export const removeHabit = createAsyncThunk<
     { id: string }
 >(
     "habits/removeHabit",
-    async (data) => {
-        await axios.delete(`${API_URL}/habits/${data.id}`);
-        return data.id;
+    async (data, { rejectWithValue }) => {
+        try {
+            await api.delete(`/habits/${data.id}`);
+            return data.id;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Failed to remove habit");
+        }
     }
 );
 
@@ -106,7 +119,7 @@ const habitSlice = createSlice({
             })
             .addCase(fetchHabits.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message || "Failed to fetch habits";
+                state.error = action.payload as string || "Failed to fetch habits";
             })
 
             // add habit cases
@@ -120,7 +133,7 @@ const habitSlice = createSlice({
             })
             .addCase(addHabit.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message || "Failed to add habit";
+                state.error = action.payload as string || "Failed to add habit";
             })
 
             // toggle habit cases
@@ -130,13 +143,20 @@ const habitSlice = createSlice({
                     habit.completedDates = action.payload.completedDates;
                 }
             })
+            .addCase(toggleHabit.rejected, (state, action) => {
+                state.error = action.payload as string || "Failed to toggle habit";
+            })
+            
             // Remove habit cases
             .addCase(removeHabit.fulfilled, (state, action) => {
                 state.habits = state.habits.filter(
                     (habit) => habit.id !== action.payload
                 );
+            })
+            .addCase(removeHabit.rejected, (state, action) => {
+                state.error = action.payload as string || "Failed to remove habit";
             });
     }
-})
+});
 
 export default habitSlice.reducer;

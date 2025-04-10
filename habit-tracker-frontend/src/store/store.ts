@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import habitsReducer from './habit-slice'
+import authReducer from './auth-slice';
 
 const store = configureStore({
   reducer: {
-    habits: habitsReducer
+    habits: habitsReducer,
+    auth: authReducer
   },
 });
 
