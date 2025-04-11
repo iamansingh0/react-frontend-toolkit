@@ -4,8 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchHabits, Habit } from '../store/habit-slice';
 import { LinearProgress, Paper, Typography, Grid } from '@mui/material';
 
-const HabitStats: React.FC = () => {
-  const { habits, isLoading, error } = useSelector((state: RootState) => state.habits);
+interface HabitStatsProps {
+  habits: Habit[];
+}
+
+const HabitStats: React.FC<HabitStatsProps> = ({ habits }) => {
+  const { isLoading, error } = useSelector((state: RootState) => state.habits);
   const dispatch = useDispatch<AppDispatch>();
 
   const getCompletedToday = () => {
