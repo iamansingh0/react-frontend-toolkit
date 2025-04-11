@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://habit-tracker-rho-opal.vercel.app'],
+  origin: ['http://localhost:5173', 'https://habit-tracker-rho-opal.vercel.app', 'https://habit-tracker-hhodgogjx-iamansingh0s-projects.vercel.app/'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
