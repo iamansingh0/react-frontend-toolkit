@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 const AddHabitForm: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [frequency, setFrequency] = useState<"daily" | "weekly">("daily");
+    const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -37,16 +38,21 @@ const AddHabitForm: React.FC = () => {
         }
     }
 
+    const toggleFormVisibility = () => {
+        setIsFormVisible(prev => !prev); 
+    };
+
     return (
-        <Paper sx={{ p: 3, borderRadius: 2, mb: 4 }}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+        <Paper sx={{ pt: 3, pb:1, px:3, borderRadius: 2, mb: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 2, cursor: 'pointer', color: 'primary.main', fontWeight: 'bold' }} onClick={() => toggleFormVisibility()}>
                 Create a New Habit
             </Typography>
-            <form onSubmit={handleSubmit}>
+            {isFormVisible && <form onSubmit={handleSubmit}>
                 <Box sx={{
                     display: 'flex',
                     flexDirection: ['column', 'row'],
                     gap: 2,
+                    mb: 2
                 }}>
                     <TextField
                         label="Habit Name"
@@ -81,7 +87,7 @@ const AddHabitForm: React.FC = () => {
                         Add Habit
                     </Button>
                 </Box>
-            </form>
+            </form>}
         </Paper>
     )
 }
