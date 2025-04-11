@@ -92,20 +92,37 @@ const HabitList: React.FC = () => {
     };
 
     const filteredHabits = habits.filter(habit => {
-        if (filter === "all") return true; 
+        if (filter === "all") return true;
         return habit.frequency === filter;
     });
 
     if (filteredHabits.length === 0) {
-        return <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2, mt: 4 }}>
-            <SentimentDissatisfied sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-                No habits yet
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-                Get started by adding your first habit above.
-            </Typography>
-        </Paper>
+        return (
+            <div>
+                <FormControl fullWidth>
+                    <InputLabel id="filter">Filter</InputLabel>
+                    <Select
+                        labelId="filter"
+                        value={filter}
+                        label="Filter"
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="all">All</MenuItem>
+                        <MenuItem value="daily">Daily</MenuItem>
+                        <MenuItem value="weekly">Weekly</MenuItem>
+                    </Select>
+                </FormControl>
+                <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2, mt: 4 }}>
+                    <SentimentDissatisfied sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                        No habits yet
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                        Get started by adding your first habit above.
+                    </Typography>
+                </Paper>
+            </div>
+        )
     }
 
     return (
@@ -222,7 +239,7 @@ const HabitList: React.FC = () => {
                     </Paper>
                 )
             })}
-            <HabitStats habits={filteredHabits}/>
+            <HabitStats habits={filteredHabits} />
         </Box>
     )
 }
