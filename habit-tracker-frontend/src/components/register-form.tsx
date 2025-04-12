@@ -12,6 +12,7 @@ const RegisterForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
@@ -26,9 +27,24 @@ const RegisterForm = ({ onSuccess }: { onSuccess: () => void }) => {
     return '';
   };
 
+  const validatePassword = (password: string) => {
+    if (!password) {
+      return 'Password is required';
+    } else if (password.length < 6) {
+      return 'Password must be at least 6 characters long';
+    } else if (!/\d/.test(password)) {
+      return 'Password must contain at least one number';
+    }
+    return '';
+  };
+
   const handleEmailBlur = () => {
     setEmailError(validateEmail(email));
   };
+
+  const handlePasswordBlur = () => {
+    setPasswordError(validatePassword(password));
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,16 +57,6 @@ const RegisterForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
     if (!name || !email || !password) {
       toast.error('Please fill in all fields', {
-        style: {
-          fontFamily: 'sans-serif',
-          fontSize: '1rem'
-        }
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters', {
         style: {
           fontFamily: 'sans-serif',
           fontSize: '1rem'
@@ -125,6 +131,9 @@ const RegisterForm = ({ onSuccess }: { onSuccess: () => void }) => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onBlur={handlePasswordBlur}
+            error={!!passwordError}
+            helperText={passwordError}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
