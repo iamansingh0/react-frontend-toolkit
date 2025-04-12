@@ -55,6 +55,12 @@ const RegisterForm = ({ onSuccess }: { onSuccess: () => void }) => {
       return;
     }
 
+    const passwordValidationError = validatePassword(password);
+    if(passwordValidationError) {
+      setPasswordError(passwordValidationError);
+      return;
+    }
+
     if (!name || !email || !password) {
       toast.error('Please fill in all fields', {
         style: {
