@@ -47,7 +47,7 @@ const initialState: AuthState = {
 //login
 export const login = createAsyncThunk<AuthResponse, LoginCredentials>("auth/login", async (credentials) => {
     const response = await api.post<AuthResponse>("/auth/login", credentials);
-    console.log('hi')
+    console.log(`hi: ${response.data}`);
     return response.data;
 })
 
@@ -93,8 +93,12 @@ const authSlice = createSlice({
             })
             .addCase(login.rejected, (state, action) => {
                 state.isLoading = false;
-                if(action.error.message?.includes('400')){
+                if(action.error.message?.includes('401')){
                     state.error = 'Invalid Credentials'
+                } else if(action.error.message?.includes('400')) {
+                    state.error = 'User does not exist.'
+                } else if(action.error.message?.includes('500')) {
+                    state.error = 'Login Failed. Try Again!'
                 } else {
                     state.error = action.error.code || "Login failed";
                 }
@@ -109,7 +113,13 @@ const authSlice = createSlice({
             })
             .addCase(register.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message || "Registration failed";
+                if(action.error.message?.includes('400')) {
+                    state.error = 'User already exists.'
+                } else if(action.error.message?.includes('500')) {
+                    state.error = 'Registration failed. Try Again!'
+                } else {
+                    state.error = action.error.message || "Registration failed";
+                }
             });
     },
 })

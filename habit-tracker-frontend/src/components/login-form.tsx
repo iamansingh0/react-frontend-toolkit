@@ -57,7 +57,7 @@ const LoginForm: React.FC = () => {
                     fontSize: '1rem'
                 }
             });
-        } catch (err: any) {
+        } catch (err) {
             // Error is handled in the reducer and displayed below
             console.log(err);
         }

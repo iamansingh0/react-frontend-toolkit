@@ -4,6 +4,8 @@ import { logout } from "../store/auth-slice";
 
 const API_BASE_URL = "https://habit-tracker-api-l94v.onrender.com/api";
 // const API_BASE_URL = "http://localhost:5000/api";
+console.log(API_BASE_URL);
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,
