@@ -4,6 +4,7 @@ import api from "../api/api";
 interface User {
     id: string;
     name: string;
+    email: string;
 }
 
 interface AuthState {
@@ -30,7 +31,18 @@ interface AuthResponse {
     user: {
         id: string;
         name: string;
+        email: string;
     };
+}
+
+interface UpdatePasswordData {
+    currentPassword: string;
+    newPassword: string;
+}
+
+interface UpdateEmailData {
+    password: string;
+    newEmail: string;
 }
 
 // Initial state
@@ -63,6 +75,44 @@ export const register = createAsyncThunk<
     return response.data;
 });
 
+// update password
+export const updatePassword = createAsyncThunk<
+    { message: string },
+    UpdatePasswordData
+>(
+    "auth/updatePassword",
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await api.put<{ message: string }>(
+                "/auth/update-password",
+                data
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.error || "Failed to update password");
+        }
+    }
+);
+
+// Update Email
+export const updateEmail = createAsyncThunk<
+    { message: string; newEmail: string },
+    UpdateEmailData
+>(
+    "auth/updateEmail",
+    async (data, { rejectWithValue }) => {
+        try {
+            const response = await api.put<{ message: string; newEmail: string }>(
+                "/auth/update-email",
+                data
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.error || "Failed to update email");
+        }
+    }
+);
+
 // Slice
 const authSlice = createSlice({
     name: "auth",
@@ -93,11 +143,11 @@ const authSlice = createSlice({
             })
             .addCase(login.rejected, (state, action) => {
                 state.isLoading = false;
-                if(action.error.message?.includes('401')){
+                if (action.error.message?.includes('401')) {
                     state.error = 'Invalid Credentials'
-                } else if(action.error.message?.includes('400')) {
+                } else if (action.error.message?.includes('400')) {
                     state.error = 'User does not exist.'
-                } else if(action.error.message?.includes('500')) {
+                } else if (action.error.message?.includes('500')) {
                     state.error = 'Login Failed. Try Again!'
                 } else {
                     state.error = action.error.code || "Login failed";
@@ -113,13 +163,45 @@ const authSlice = createSlice({
             })
             .addCase(register.rejected, (state, action) => {
                 state.isLoading = false;
-                if(action.error.message?.includes('400')) {
+                if (action.error.message?.includes('400')) {
                     state.error = 'User already exists.'
-                } else if(action.error.message?.includes('500')) {
+                } else if (action.error.message?.includes('500')) {
                     state.error = 'Registration failed. Try Again!'
                 } else {
                     state.error = action.error.message || "Registration failed";
                 }
+            })
+            // Update Password cases
+            .addCase(updatePassword.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updatePassword.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(updatePassword.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+            })
+
+            // Update Email cases
+            .addCase(updateEmail.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updateEmail.fulfilled, (state, action) => {
+                state.isLoading = false;
+                if (state.user && action.payload.newEmail) {
+                    state.user = {
+                        ...state.user,
+                        email: action.payload.newEmail
+                    };
+                    localStorage.setItem("user", JSON.stringify(state.user));
+                }
+            })
+            .addCase(updateEmail.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
             });
     },
 })
