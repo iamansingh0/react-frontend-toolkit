@@ -3,6 +3,7 @@ import { AppDispatch, RootState } from '../store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchHabits, Habit } from '../store/habit-slice';
 import { LinearProgress, Paper, Typography, Grid } from '@mui/material';
+import { getStreak } from '../utils/utils';
 
 interface HabitStatsProps {
   habits: Habit[];
@@ -15,20 +16,6 @@ const HabitStats: React.FC<HabitStatsProps> = ({ habits }) => {
   const getCompletedToday = () => {
     const today = new Date().toISOString().split("T")[0];
     return habits.filter((h) => h.completedDates.includes(today)).length;
-  }
-
-  const getStreak = (habit: Habit) => {
-    let streak = 0;
-    const currentDate = new Date();
-    while (true) {
-      const dateString = currentDate.toISOString().split("T")[0];
-      if (habit.completedDates.includes(dateString)) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else { break; }
-    }
-
-    return streak;
   }
 
   const getLongestStreak = () => {
